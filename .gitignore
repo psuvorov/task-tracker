@@ -1,0 +1,14 @@
+
+/classes
+pom.xml
+*jar
+.lein-failures
+.lein-deps-sum
+target
+.settings
+.metadata
+.project
+.classpath
+/resources/public/cljs
+
+.lein-cljsbuild-compiler-0/
