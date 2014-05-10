@@ -5,12 +5,25 @@
             [enfocus.bind :as bind]
             [goog.dom :as dom]
             [ajax.core :as x]
+            [cljs-bcrypt-wrapper.core :as bcrypt]
             [task-tracker.client-side.ajax :as server-calls])
   ;;(:use task-tracker.client-side.ajax)
   (:require-macros [enfocus.macros :as em]))
 
+(defn log-str
+  ([x]   (do (.log js/console (pr-str x)) x))
+  ([m x] (do (log-str {:msg m :data x})   x)))
+
+(def secret-hash "$2a$10$mlJUX2qOS6jGxwv7y39Y4OJsIPUtbTkIV6GU1bODoR9auVM96QUpu")
+
+(defn complete-callback [candidate-hash]
+  (str candidate-hash))
+
+
+
 (declare
  ;;home
+         sec-hash
          about-tmpl-page
          authenticate-tmpl-page
          contact-tmpl-page
@@ -78,31 +91,15 @@
    "
    <li id='about_button'><a href='/#about'>About</a></li>
    <li id='authenticate_button'><a href='/#authenticate'>Login/Register</a></li>
-   <li id='contact_button'><a href='/#contact'>Contact</a></li>
-
-   "))
+   <li id='contact_button'><a href='/#contact'>Contact</a></li>"))
 
 
-(defn handler [response]
-  (.log js/console (str response)))
-
-(defn error-handler [{:keys [status status-text]}]
-  (.log js/console (str "something bad happened: " status " " status-text)))
-
-(defn test-ajax []
-  (x/GET "/tt"
-        {:params {:message "Hello World"
-                  :user    "Bob"}
-         :handler handler
-         :error-handler error-handler}))
 
 
 
 
 (set! (.-onload js/window)
   (do
-    (test-ajax)
-    ;;(js/alert "load!")
     (setup-menu-links)
     (setup-menu-actions)
     ;;(update-hash :about)
@@ -111,13 +108,19 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Index templates           ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ;;
 
 (em/deftemplate authenticate-tmpl :compiled "public/templates/authenticate.html" [])
 (em/defaction authenticate-tmpl-page []
   "#container_stage" (ef/do->
                       (ef/content (authenticate-tmpl))
-                      (reset-scroll)))
+                      (reset-scroll))
+  "#login-btn" (ev/listen
+                 :click
+                 #(ef/at (.-currentTarget %)
+                         (bcrypt/hashpw "secret" secret-hash
+                                        (fn [candidate-hash]
+                                          (server-calls/login-attempt-message "admin" candidate-hash))))))
 
 (em/deftemplate about-tmpl :compiled "public/templates/about.html" [])
 (em/defaction about-tmpl-page []
@@ -133,15 +136,5 @@
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Custom events             ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;(ef/at "#login-btn" (ev/listen :click
-;;                             (;;server-calls/login-attempt-message
-;;                              ;;(js/alert (str (ef/from "#login" (ef/read-form)) " :: " (ef/from "#password" (ef/get-text))))
-;;                              (server-calls/login-attempt-message "bbbbbbguhrty")
-;;
-;;                              ;;{:login (ef/from "#login" (ef/get-text))
-;;                               ;;:password (ef/from "#password" (ef/get-text))}
-;;                              )))
+
 

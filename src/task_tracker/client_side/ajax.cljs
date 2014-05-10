@@ -15,10 +15,13 @@
 
 
 (defn login-handler [response]
-  (.log js/console (str response)))
+  (js/alert (str "*::" response)))
 
 
 
-(defn login-attempt-message [message]
-  (x/POST "/login" {:handler login-handler
-                   :error-handler error-handler}))
+(defn login-attempt-message [login password]
+  (x/POST "/login" {
+                    :handler login-handler
+                    :error-handler error-handler
+                    :params {:login login
+                             :password password}}))

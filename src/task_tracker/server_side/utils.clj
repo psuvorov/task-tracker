@@ -18,7 +18,7 @@
           users)) :roles))
 
 
-(encrypt "aa")
-(compare "aaa" (encrypt "aa"))
+(encrypt "aaa")
+(compare "secret" "$2a$10$mlJUX2qOS6jGxwv7y39Y4OdwtE9w/CCJQygqve3ZlLopktECyEOuu")
 (get-user-roles "admin")
 (check-user "admin" "secret")

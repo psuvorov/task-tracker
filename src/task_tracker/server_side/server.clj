@@ -39,13 +39,14 @@
 (defn generate-response [{params :params}]
   {:status 200
    :headers {"Content-Type" "application/edn"}
-   :body (pr-str (str "Hello, " (params "user") "!"))})
+   :body (pr-str (str "Hello, " (get params :login) " :: " (get params :password)))
+   })
 
 
 (defroutes app-routes
   (GET "/" [] (ring-resp/resource-response "views/index.html" {:root "public"}))
   ;;(POST "/login" [request] (params/wrap-params login-handler request))
-  (POST "/login" [request] (generate-response "xcvbcxbcvb123"))
+  (POST "/login" [request] (params/wrap-params generate-response request))
   (GET "/tasks" [] (ring-resp/resource-response "views/tasks.html" {:root "public"}))
   (GET "/tt" [request] (params/wrap-params generate-response request))
   (GET "/state" [request] (check-state))
