@@ -3,8 +3,11 @@
             [enfocus.effects :as effects]
             [enfocus.events :as ev]
             [enfocus.bind :as bind]
-            [goog.dom :as dom])
-  	(:require-macros [enfocus.macros :as em]))
+            [goog.dom :as dom]
+            [ajax.core :as x]
+            [task-tracker.client-side.ajax :as server-calls])
+  ;;(:use task-tracker.client-side.ajax)
+  (:require-macros [enfocus.macros :as em]))
 
 (declare
  ;;home
@@ -64,7 +67,7 @@
  50)
 
 
-;; defines actions
+;; define actions
 (em/defaction setup-menu-actions []
               "#authenticate_button" (ev/listen :click (update-hash :authenticate))
               "#about_button" (ev/listen :click (update-hash :about))
@@ -79,12 +82,29 @@
 
    "))
 
+
+(defn handler [response]
+  (.log js/console (str response)))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text)))
+
+(defn test-ajax []
+  (x/GET "/tt"
+        {:params {:message "Hello World"
+                  :user    "Bob"}
+         :handler handler
+         :error-handler error-handler}))
+
+
+
+
 (set! (.-onload js/window)
   (do
-    (js/alert "load!")
+    (test-ajax)
+    ;;(js/alert "load!")
     (setup-menu-links)
     (setup-menu-actions)
-    ;;(js/alert "load!")
     ;;(update-hash :about)
     ))
 
@@ -112,4 +132,16 @@
                       (reset-scroll)))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Custom events             ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;(ef/at "#login-btn" (ev/listen :click
+;;                             (;;server-calls/login-attempt-message
+;;                              ;;(js/alert (str (ef/from "#login" (ef/read-form)) " :: " (ef/from "#password" (ef/get-text))))
+;;                              (server-calls/login-attempt-message "bbbbbbguhrty")
+;;
+;;                              ;;{:login (ef/from "#login" (ef/get-text))
+;;                               ;;:password (ef/from "#password" (ef/get-text))}
+;;                              )))
 

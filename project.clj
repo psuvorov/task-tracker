@@ -7,6 +7,8 @@
                  [ring/ring-core "1.2.2"]
                  [ring/ring-jetty-adapter "1.2.2"]
                  [lib-noir "0.8.2"]
+                 [cljs-ajax "0.2.3"]
+                 [fogus/ring-edn "0.2.0"]
                  ;;[com.cemerick/friend "0.2.0"]
                  ]
   :plugins [[lein-cljsbuild "0.3.2"]
@@ -16,6 +18,6 @@
                                          :optimizations :advanced
                                          ;;:externs ["resources/public/js/lang-clj.js"]
                                          }}}}
-  :profiles {:dev {:dependencies [[ring "1.2.2"]]}}                                         
+  :profiles {:dev {:dependencies [[ring "1.2.2"]]}}
   :main task-tracker.server-side.server
   :ring {:handler task-tracker.server-side.server/app})

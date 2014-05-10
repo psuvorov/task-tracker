@@ -1,7 +1,7 @@
 (ns task-tracker.server-side.config)
 
 (def users
-  [{:login "admin" :password "secret" :roles #{:admin}}
+  [{:login "admin" :password "s" :roles #{:admin}}
    {:login "user1" :password "secret" :roles #{:user}}
    {:login "user2" :password "secret" :roles #{:user}}
    {:login "user3" :password "secret" :roles #{:user}}
