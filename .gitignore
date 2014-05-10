@@ -12,3 +12,4 @@ target
 /resources/public/cljs
 
 .lein-cljsbuild-compiler-0/
+*.js

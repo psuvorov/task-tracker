@@ -1,7 +1,17 @@
 (ns task-tracker.server-side.utils
-  (:use task-tracker.server-side.config
-        noir.util.crypt
-        ))
+  (:use [compojure.core]
+        [task-tracker.server-side.utils]
+        [ring.middleware.edn]
+        [task-tracker.server-side.config])
+  (:require [ring.adapter.jetty :as jetty]
+            [compojure.handler :as handler]
+            [compojure.route :as route]
+            [ring.middleware.params :as params]
+            [ring.util.response :as ring-resp]
+            [noir.session :as session]
+            [noir.util.crypt :as crypt]
+            [ring.middleware.session.memory :refer [memory-store]]
+            ))
 
 
 (defn check-user [login pass]
@@ -9,7 +19,7 @@
                (fn [user]
                  (and
                   (= login (get user :login))
-                  (= pass (get user :password))))
+                  (noir.util.crypt/compare "s" pass))) ;; temporary; working with the db is coming
                users))))
 
 
@@ -18,7 +28,53 @@
           users)) :roles))
 
 
-(encrypt "aaa")
-(compare "secret" "$2a$10$mlJUX2qOS6jGxwv7y39Y4OdwtE9w/CCJQygqve3ZlLopktECyEOuu")
-(get-user-roles "admin")
-(check-user "admin" "secret")
+(defn check-state []
+  (do
+    (println (session/get :login))))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Authorization handler     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn login-handler [login password]
+   (if (check-user login password)
+    (let [roles (get-user-roles login)]
+      (do
+        (println "ok!!")
+        (session/put! :login login)
+        (session/put! :roles roles)
+        {:status 200
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str "authorized")}))
+    (do
+      (println "bad!!" ":: " login " / " password)
+      {:status 200
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str "unknown")})))
+
+(defn login-response [{params :params}]
+  (login-handler (get params :login) (get params :password)))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; User permission handler   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn user-permission-handler [test]
+   (do
+     (println test)
+     {:status 200
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str (session/get :login))}))
+
+(defn user-permission-response [{params :params}]
+
+
+    (user-permission-handler (get params :test))
+    )
+
+

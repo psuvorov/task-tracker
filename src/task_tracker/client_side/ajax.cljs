@@ -14,14 +14,36 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Login handler             ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn login-handler [response]
-  (js/alert (str "*::" response)))
+  (if (= "authorized" response)
+    (set! (.-location js/document) "/tasks")
+    (js/alert "Unknown user!")))
 
-
-
-(defn login-attempt-message [login password]
+(defn login-attempt-message-sender [login password]
   (x/POST "/login" {
                     :handler login-handler
                     :error-handler error-handler
                     :params {:login login
                              :password password}}))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Authorization handler     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn is-auth-user-handler [response]
+  (.log js/console response))
+
+
+
+
+(defn is-auth-user-message-sender []
+  (x/POST "/is-auth-user" {
+                    :handler is-auth-user-handler
+                    :error-handler error-handler
+                    :params {:test "param-test"
+                             }}))
