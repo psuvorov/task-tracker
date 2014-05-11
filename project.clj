@@ -1,6 +1,6 @@
-(defproject enfocus-demp "2.0.0-SNAPSHOT"
-  :description "enfocus documentation site"
-  :url "http://ckirkendall.github.io/enfocus-site"
+(defproject task-tracker "1.0.0-SNAPSHOT"
+  :description "Task tracker"
+  :url "http://madcatsam.herokuapp.com/"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [enfocus "2.1.0-SNAPSHOT"]
                  [compojure "1.1.5"]
