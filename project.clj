@@ -22,5 +22,6 @@
                                          ;;:externs ["resources/public/js/lang-clj.js"]
                                          }}}}
   :profiles {:dev {:dependencies [[ring "1.2.2"]]}}
+  :min-lein-version "2.0.0"
   :main task-tracker.server-side.server
   :ring {:handler task-tracker.server-side.server/app})
