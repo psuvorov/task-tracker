@@ -13,7 +13,10 @@ Coming:
  - Connecting with the DB (possibly mongodb)
  - Prototype of the application itself
 
-The deployed application on http://aqueous-headland-8547.herokuapp.com/
+The deployed application on http://madcatsam.herokuapp.com/
+
+login/pass:
+admin/s
 
 ## Usage
 
