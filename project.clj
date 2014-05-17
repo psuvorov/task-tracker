@@ -12,12 +12,14 @@
                  ;;[clj-bcrypt-wrapper "0.1.0"]
                  [cljs-bcrypt-wrapper "0.0.3"]
                  ;;[com.cemerick/friend "0.2.0"]
+                 [com.novemberain/monger "2.0.0-rc1"]
+                 ;;[de.ubercode.clostache/clostache "1.4.0"]
                  ]
   :plugins [[lein-cljsbuild "0.3.2"]
             [lein-ring "0.8.3"]]
   :cljsbuild {:builds {:prod {:source-paths ["src"],
                               :compiler {:output-to "resources/public/js/main.js"
-                                         :optimizations :advanced
+                                         :optimizations :none
                                          :externs ["js/bcrypt-externs.js"]
                                          ;;:externs ["resources/public/js/lang-clj.js"]
                                          }}}}

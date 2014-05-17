@@ -1,13 +1,13 @@
-(ns task-tracker.client-side.index
+(ns task-tracker.client-side.main
   (:require [enfocus.core :as ef]
             [enfocus.effects :as effects]
             [enfocus.events :as ev]
             [enfocus.bind :as bind]
             [goog.dom :as dom]
             [ajax.core :as x]
-            [cljs-bcrypt-wrapper.core :as bcrypt]
-            [task-tracker.client-side.ajax :as server-calls]
-            [task-tracker.client-side.utils :as client-utils])
+            ;;[cljs-bcrypt-wrapper.core :as bcrypt]
+            [task-tracker.client-side.utils :as client-utils]
+            )
   (:require-macros [enfocus.macros :as em]))
 
 
@@ -16,7 +16,9 @@
 (declare
  about-tmpl-page
  authenticate-tmpl-page
- contact-tmpl-page)
+ contact-tmpl-page
+ tasks-tmpl-page-fn
+ task-tmpl-page)
 
 
 
@@ -26,15 +28,14 @@
 (em/defaction add-active-menu-class [menu-item]
   (str "#" menu-item "_button") (ef/add-class "active"))
 
-
-
-
 (defn navigation-watcher [ky atm oval nval]
   (condp = nval
     ""  (set!  (.-location js/document) "index.html") ;;??
     "about" (client-utils/navigate about-tmpl-page)
     "authenticate" (client-utils/navigate authenticate-tmpl-page)
     "contact" (client-utils/navigate contact-tmpl-page)
+    "tasks" (client-utils/navigate tasks-tmpl-page-fn)
+    ;;"task" (client-utils/navigate task-tmpl-page)
     (ef/log-debug (pr-str "ERROR IN NAVIGATION" oval nval))))
 
 (def url-hash (atom ""))
@@ -62,15 +63,14 @@
 (em/defaction setup-menu-actions []
               "#authenticate_button" (ev/listen :click (update-hash :authenticate))
               "#about_button" (ev/listen :click (update-hash :about))
-              "#contact_button" (ev/listen :click (update-hash :contact)))
+              "#contact_button" (ev/listen :click (update-hash :contact))
+              "#tasks_button" (ev/listen :click (update-hash :tasks))
+              ;;"#task_button" (ev/listen :click (update-hash :task))
+              )
 
 
 
-
-
-
-
-
+;; onload event
 (set! (.-onload js/window)
   (do
     ;;(js/alert "loaded!")
@@ -81,11 +81,40 @@
 
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Index templates           ;;
+;; AJAX processing           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn error-handler [{:keys [status status-text]}]
+  (js/alert (str "something bad has happened: " status " " status-text)))
 
+
+
+
+
+;; Login handler
+(defn login-handler [response]
+  (do
+    (if (= "authorized" response)
+
+      (set! (.-location js/document) "/#tasks")
+      (js/alert "Unknown user!"))))
+
+(defn login-attempt-message-sender [login password]
+
+    (x/POST "/login" {
+                    :handler login-handler
+                    :error-handler error-handler
+                    :params {:login login
+                             :password password}}))
+
+
+
+
+
+
+
+
+;; Index templates
 (em/deftemplate authenticate-tmpl :compiled "public/templates/authenticate.html" [])
 (em/defaction authenticate-tmpl-page []
 
@@ -95,17 +124,14 @@
 
               "#login-btn" (ev/listen
                  :click
-                 #(ef/at (.-currentTarget %)
-                         (bcrypt/hashpw (ef/from "#password" (ef/read-form-input)) client-utils/secret-hash
-                                        (fn [candidate-hash]
-                                          (server-calls/login-attempt-message-sender (ef/from "#login" (ef/read-form-input)) candidate-hash)))))
+                 #(ef/at ;;(.-currentTarget %)
+                         (login-attempt-message-sender (str (ef/from "#login" (ef/read-form-input)) )
+                                                       (str (ef/from "#password" (ef/read-form-input))))))
 
-
-              ;; remove me!
               "#cancell-btn" (ev/listen
                  :click
                  #(ef/at (.-currentTarget %)
-                         (server-calls/is-auth-user-message-sender))))
+                         (set! (.-location js/document) "/"))))
 
 (em/deftemplate about-tmpl :compiled "public/templates/about.html" [])
 (em/defaction about-tmpl-page []
@@ -120,6 +146,42 @@
               "#container_stage" (ef/do->
                       (ef/content (contact-tmpl))
                       (client-utils/reset-scroll)))
+
+
+
+
+;; Tasks templates
+(em/deftemplate tasks-tmpl :compiled "public/templates/tasks.html" [title]
+                "#title" (ef/content title))
+(defn tasks-tmpl-page-fn []
+
+                (x/POST "/get-tasks-data" {
+                    :handler (fn [response] ((em/defaction tasks-tmpl-inner []
+
+
+                                                           "#container_stage" (ef/do->
+
+                                                                               (ef/content (tasks-tmpl (str response)))
+
+                                                                               (client-utils/reset-scroll))))
+
+
+
+
+                                  )
+                    :error-handler error-handler
+                    :params {}})
+
+
+
+
+
+
+
+
+
+
+              )
 
 
 

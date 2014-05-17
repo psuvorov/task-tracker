@@ -10,7 +10,7 @@
 
 
 ;; Login helpers
-(def secret-hash "$2a$10$mlJUX2qOS6jGxwv7y39Y4OJsIPUtbTkIV6GU1bODoR9auVM96QUpu")
+;;(def secret-hash "$2a$10$mlJUX2qOS6jGxwv7y39Y4OJsIPUtbTkIV6GU1bODoR9auVM96QUpu")
 
 
 
