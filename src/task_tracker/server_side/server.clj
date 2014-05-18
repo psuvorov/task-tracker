@@ -15,9 +15,7 @@
             [noir.util.middleware :as middleware]
             [ring.middleware.session.memory :refer [memory-store]]
             [monger.core :as mg]
-            )
-  ;;(:import [com.mongodb MongoOptions ServerAddress])
-  )
+            ))
 
 
 
@@ -51,7 +49,7 @@
 
 (defn app-init [handler]
   (fn [req]
-    (session/put! :conn-data (mg/connect-via-uri "mongodb://madcat:!clojure!@oceanic.mongohq.com:10047/task_tracker"))
+    (session/put! :conn-data (mg/connect-via-uri "mongodb://madcat:x@oceanic.mongohq.com:10047/task_tracker"))
     (handler req)))
 
 
@@ -66,10 +64,5 @@
 
 
 (defn -main [& args]
-
   (let [port (Integer/parseInt (get (System/getenv) "PORT" "5000"))]
-    (jetty/run-jetty app {:port port :join? false}))
-  ;;(session/put! :conn-data (mg/connect-via-uri "mongodb://madcat:!clojure!@oceanic.mongohq.com:10047/task_tracker"))
-
-
-  )
+    (jetty/run-jetty app {:port port :join? false})))

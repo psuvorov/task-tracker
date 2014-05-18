@@ -11,15 +11,11 @@
 
 
 
-
-;; http://stackoverflow.com/questions/11737361/keeping-a-global-monger-connection-accessible-from-all-models
-;; http://stackoverflow.com/questions/17950969/when-using-monger-do-i-need-to-supply-connection-each-request
-
 ;; user-login - user for that tasks to be returned
 (defn get-tasks-list-for-current-user [user-login connection-data]
-  (let [res (vec (mc/find-maps (get connection-data :db) "tasks" {:responsible user-login} ))]
-    res))
+  (let [res (mc/find-maps (get connection-data :db) "tasks" {:responsible user-login})]
+     (for [entry res
+           :let [ne (assoc entry :_id (str (:_id entry)))]] ne)))
 
-
-(get-tasks-list-for-current-user "user1" (mg/connect-via-uri "mongodb://madcat:!clojure!@oceanic.mongohq.com:10047/task_tracker"))
+;;(get-tasks-list-for-current-user "user1" (mg/connect-via-uri "mongodb://madcat:[pass]@oceanic.mongohq.com:10047/task_tracker"))
 
