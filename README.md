@@ -8,15 +8,15 @@ There are the following features (at this stage):
  - User authentication via EDN format with encrypting the password and sending to the server;
  - Page protection (/tasks);
  - Working through enfocus templates;
+ - Working with mongodb;
+ - Simple viewing assigned tasks;
 
-Coming:
- - Connecting with the DB (possibly mongodb)
- - Prototype of the application itself
+
 
 The deployed application on http://madcatsam.herokuapp.com/
 
 login/pass:
-admin/s
+user1/secret
 
 ## Usage
 
