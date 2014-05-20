@@ -79,4 +79,17 @@
 (defn user-tasks-response [request]
     (user-tasks-handler request))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; User task handler         ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn user-task-handler [task-id]
+     (if (session/get :login)
+       {:status 200
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str (get-task-data-for-current-user task-id))}
+       {:status 200
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str "denied")}
+       ))
+(defn user-task-response [{params :params}]
+    (user-task-handler (get params :task-id)))

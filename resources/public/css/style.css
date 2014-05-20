@@ -1,3 +1,16 @@
 .invis {
   display: none !important;
 }
+
+.task_desc {
+
+}
+
+.task_post {
+  margin-bottom: 20px;
+
+}
+
+.task_head {
+  font-size: 12px;
+}

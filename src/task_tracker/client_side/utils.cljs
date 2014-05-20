@@ -24,4 +24,5 @@
 
 (defn navigate [page]
   (page)
-  (.scrollTo js/window 0 0))
+  (.scrollTo js/window 0 0)
+  )

@@ -18,7 +18,7 @@
  authenticate-tmpl-page
  contact-tmpl-page
  tasks-tmpl-page-fn
- task-tmpl-page
+ task-tmpl-page-fn
  denied-tmpl-page);;
 
 (def user-login (atom "")) ;;
@@ -35,14 +35,14 @@
   (str "#" menu-item "_button") (ef/add-class "active"))
 
 (defn navigation-watcher [ky atm oval nval]
-  (condp = nval
-    ""  (set!  (.-location js/document) "/") ;;index.html
-    "about" (client-utils/navigate about-tmpl-page)
-    "authenticate" (client-utils/navigate authenticate-tmpl-page)
-    "contact" (client-utils/navigate contact-tmpl-page)
-    "tasks" (client-utils/navigate tasks-tmpl-page-fn)
-    ;;"task" (client-utils/navigate task-tmpl-page)
-    (ef/log-debug (pr-str "ERROR IN NAVIGATION" oval nval))))
+  (cond
+    (= "" nval)  (set!  (.-location js/document) "/") ;;index.html
+    (= "about" nval) (client-utils/navigate about-tmpl-page)
+    (= "authenticate" nval) (client-utils/navigate authenticate-tmpl-page)
+    (= "contact" nval) (client-utils/navigate contact-tmpl-page)
+    (= "tasks" nval) (client-utils/navigate tasks-tmpl-page-fn)
+    (apply = (map first [nval "task_"])) (client-utils/navigate (task-tmpl-page-fn (.substring nval (inc (.indexOf nval "_")) (count nval))))
+    :else (ef/log-debug (pr-str "ERROR IN NAVIGATION" oval nval))))
 
 (def url-hash (atom ""))
 
@@ -131,7 +131,9 @@
 (defn check-auth-handler [response]
 
     (if (or (string? user-login) (not (= response nil)))
-    (do (set! user-login (str response))(logged-in-button-invis) (js/alert "logged-in-button-invis!"))
+    (do (set! user-login (str response))(logged-in-button-invis)
+      ;;(js/alert "logged-in-button-invis!")
+      )
     (logged-out-button-invis))
 )
 (defn check-auth-message-sender []
@@ -181,7 +183,7 @@
 
 
 
-;; Tasks templates
+;; Tasks template
 (em/deftemplate tasks-tmpl :compiled "public/templates/tasks.html" [data]
                 "#title" (ef/content (str user-login ", your tasks are:"))
                  "#task_table" (ef/content (#(apply str (for [r %]
@@ -190,11 +192,9 @@
                 )
 
 (defn tasks-handler [response]
-
-    (do  (if (= "denied" response)
+    (if (= "denied" response)
       (ef/at "#container_stage" (ef/content (denied-tmpl)))
-      (ef/at "#container_stage" (ef/content (tasks-tmpl response)))
-        )))
+      (ef/at "#container_stage" (ef/content (tasks-tmpl response)))))
 
 (defn tasks-tmpl-page-fn []
                 (x/POST "/get-tasks-data" {
@@ -204,6 +204,27 @@
 
 
 
+;; Task template ;;
+(em/deftemplate task-tmpl :compiled "public/templates/task.html" [data]
+                "#task" (ef/content (#(apply str (for [r %]
+                                               (str "<div class='task_desc'>
+                                                    <h3>" (:task_name r) "</h3>
+                                                    <p>Created by: " (:created_by r) ", date start: " (:date_start r) ", date end: " (:date_end r) "   </p><hr />"
+                                                    (apply str (for [t (:task_posts r)]
+                                                                 (str "<div class='task_post'><div class='task_head'>Written by: " (:user t) ", at " (:creation_date t) " </div>" (:text t) "</div>")))
+                                                    "</div>"))) data)))
+
+(defn task-handler [response]
+    (if (= "denied" response)
+      (ef/at "#container_stage" (ef/content (denied-tmpl)))
+      (ef/at "#container_stage" (ef/content (task-tmpl response)))
+      ))
+
+(defn task-tmpl-page-fn [task-id]
+  (x/POST "/get-task-data" {
+                    :handler task-handler
+                    :error-handler error-handler
+                    :params {:task-id task-id}}))
 
 
 

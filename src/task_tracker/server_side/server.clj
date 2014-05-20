@@ -30,6 +30,7 @@
   (GET "/logout" [request] (params/wrap-params logout-response request))
   (POST "/check-auth" [request] (params/wrap-params check-auth-response request))
   (POST "/get-tasks-data" [request] (params/wrap-params user-tasks-response request))
+  (POST "/get-task-data" [request] (params/wrap-params user-task-response request))
 
   ;; Service requests
   (GET "/state" [request] (check-state))

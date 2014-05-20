@@ -10,7 +10,7 @@
                  [cljs-ajax "0.2.3"]
                  [fogus/ring-edn "0.2.0"]
                  ;;[clj-bcrypt-wrapper "0.1.0"]
-                 [cljs-bcrypt-wrapper "0.0.3"]
+                 ;;[cljs-bcrypt-wrapper "0.0.3"]
                  ;;[com.cemerick/friend "0.2.0"]
                  [com.novemberain/monger "2.0.0-rc1"]
                  ;;[de.ubercode.clostache/clostache "1.4.0"]
@@ -19,8 +19,8 @@
             [lein-ring "0.8.3"]]
   :cljsbuild {:builds {:prod {:source-paths ["src"],
                               :compiler {:output-to "resources/public/js/main.js"
-                                         :optimizations :advanced
-                                         :externs ["js/bcrypt-externs.js"]
+                                         :optimizations :simple
+                                         ;;:externs ["js/bcrypt-externs.js"]
                                          ;;:externs ["resources/public/js/lang-clj.js"]
                                          }}}}
   :profiles {:dev {:dependencies [[ring "1.2.2"]]}}
