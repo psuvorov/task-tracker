@@ -3,7 +3,7 @@
             [enfocus.effects :as effects]
             [enfocus.events :as ev]
             [enfocus.bind :as bind]
-            [goog.dom :as dom]
+            ;;[goog.dom :as dom]
             [ajax.core :as x])
   	(:require-macros [enfocus.macros :as em]))
 

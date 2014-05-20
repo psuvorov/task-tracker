@@ -3,7 +3,7 @@
             [enfocus.effects :as effects]
             [enfocus.events :as ev]
             [enfocus.bind :as bind]
-            [goog.dom :as dom]
+            ;;[goog.dom :as dom]
             [ajax.core :as x]
             ;;[cljs-bcrypt-wrapper.core :as bcrypt]
             [task-tracker.client-side.utils :as client-utils]
@@ -18,8 +18,14 @@
  authenticate-tmpl-page
  contact-tmpl-page
  tasks-tmpl-page-fn
- task-tmpl-page)
+ task-tmpl-page
+ denied-tmpl-page);;
 
+(def user-login (atom "")) ;;
+
+
+(em/defaction logged-in-button-invis [] "#authenticate_button" (ef/add-class "invis") "#logout_button" (ef/remove-class "invis"))
+(em/defaction logged-out-button-invis [] "#authenticate_button" (ef/remove-class "invis") "#logout_button" (ef/add-class "invis"))
 
 
 (em/defaction clear-active-menu-item-class []
@@ -30,7 +36,7 @@
 
 (defn navigation-watcher [ky atm oval nval]
   (condp = nval
-    ""  (set!  (.-location js/document) "index.html") ;;??
+    ""  (set!  (.-location js/document) "/") ;;index.html
     "about" (client-utils/navigate about-tmpl-page)
     "authenticate" (client-utils/navigate authenticate-tmpl-page)
     "contact" (client-utils/navigate contact-tmpl-page)
@@ -42,12 +48,16 @@
 
 (add-watch url-hash :nav navigation-watcher)
 
+
+
+
 (defn update-hash [hash-key]
   (fn [event]
     (.preventDefault event)
     (clear-active-menu-item-class)
     (add-active-menu-class (name hash-key))
-    (set! (.-hash (.-location js/document)) (str "#" (name hash-key)))))
+    (set! (.-hash (.-location js/document)) (str "#" (name hash-key)))
+    ))
 
 (.setInterval
  js/window
@@ -70,14 +80,7 @@
 
 
 
-;; onload event
-(set! (.-onload js/window)
-  (do
-    ;;(js/alert "loaded!")
-    ;;(server-calls/is-auth-user-message-sender)
-    ;;(setup-menu-links)
-    (setup-menu-actions)
-    ))
+
 
 
 
@@ -94,9 +97,14 @@
 ;; Login handler
 (defn login-handler [response]
   (do
-    (if (= "authorized" response)
-
-      (set! (.-location js/document) "/#tasks")
+    (if-not (= "" response)
+      (do
+        (clear-active-menu-item-class)
+        (add-active-menu-class (name :tasks))
+        (set! user-login response)
+        ;;(js/alert (str user-login "**" (string? user-login)))
+        (logged-in-button-invis)
+        (set! (.-location js/document) (str "#" (name :tasks))))
       (js/alert "Unknown user!"))))
 
 (defn login-attempt-message-sender [login password]
@@ -108,10 +116,33 @@
                              :password password}}))
 
 
+;; Logout handler
+
+(defn logout-attempt-message-sender []
+
+    (x/GET "/logout" {
+                    :error-handler error-handler
+                    :params {}}))
 
 
 
 
+
+(defn check-auth-handler [response]
+
+    (if (or (string? user-login) (not (= response nil)))
+    (do (set! user-login (str response))(logged-in-button-invis) (js/alert "logged-in-button-invis!"))
+    (logged-out-button-invis))
+)
+(defn check-auth-message-sender []
+
+    (x/POST "/check-auth" {
+                    :handler check-auth-handler
+                    :error-handler error-handler
+                    :params {}}))
+
+
+(em/deftemplate denied-tmpl :compiled "public/templates/denied.html" [])
 
 
 ;; Index templates
@@ -151,39 +182,37 @@
 
 
 ;; Tasks templates
-(em/deftemplate tasks-tmpl :compiled "public/templates/tasks.html" [title]
-                "#title" (ef/content title))
+(em/deftemplate tasks-tmpl :compiled "public/templates/tasks.html" [data]
+                "#title" (ef/content (str user-login ", your tasks are:"))
+                 "#task_table" (ef/content (#(apply str (for [r %]
+                                               (str "<tr><td><a href=\"#task_" (:_id r) "\">" (:task_name r) "</a></td><td>" (:created_by r) "</td><td>"
+                                                    (:date_start r) "</td><td>" (:date_end r) "</td></tr>"))) data))
+                )
+
+(defn tasks-handler [response]
+
+    (do  (if (= "denied" response)
+      (ef/at "#container_stage" (ef/content (denied-tmpl)))
+      (ef/at "#container_stage" (ef/content (tasks-tmpl response)))
+        )))
+
 (defn tasks-tmpl-page-fn []
-
                 (x/POST "/get-tasks-data" {
-                    :handler (fn [response] ((em/defaction tasks-tmpl-inner []
-
-
-                                                           "#container_stage" (ef/do->
-
-                                                                               (ef/content (tasks-tmpl (str response)))
-
-                                                                               (client-utils/reset-scroll))))
-
-
-
-
-                                  )
+                    :handler tasks-handler
                     :error-handler error-handler
-                    :params {}})
+                    :params {}}))
 
 
 
 
 
 
-
-
-
-
-              )
-
-
-
-
-
+;; onload event
+(set! (.-onload js/window)
+  (do
+    (check-auth-message-sender)
+    ;;(js/alert "loaded!")
+    ;;(server-calls/is-auth-user-message-sender)
+    ;;(setup-menu-links)
+    (setup-menu-actions)
+    ))

@@ -19,7 +19,7 @@
             [lein-ring "0.8.3"]]
   :cljsbuild {:builds {:prod {:source-paths ["src"],
                               :compiler {:output-to "resources/public/js/main.js"
-                                         :optimizations :none
+                                         :optimizations :advanced
                                          :externs ["js/bcrypt-externs.js"]
                                          ;;:externs ["resources/public/js/lang-clj.js"]
                                          }}}}

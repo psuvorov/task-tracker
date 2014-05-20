@@ -1,4 +1,6 @@
 (ns task-tracker.server-side.tasks
+  (:use
+   task-tracker.server-side.config)
   (:require
    [ring.middleware.params :as params]
    [noir.session :as session]
@@ -12,10 +14,10 @@
 
 
 ;; user-login - user for that tasks to be returned
-(defn get-tasks-list-for-current-user [user-login connection-data]
-  (let [res (mc/find-maps (get connection-data :db) "tasks" {:responsible user-login})]
-     (for [entry res
-           :let [ne (assoc entry :_id (str (:_id entry)))]] ne)))
+(defn get-tasks-list-for-current-user [user-login]
+  (let [res (mc/find-maps (get mongo-connection-data :db) "tasks" {:responsible user-login})]
+     (vec (for [entry res
+           :let [ne (assoc entry :_id (str (:_id entry)))]] ne))))
 
-;;(get-tasks-list-for-current-user "user1" (mg/connect-via-uri "mongodb://madcat:[pass]@oceanic.mongohq.com:10047/task_tracker"))
+;;(get-tasks-list-for-current-user "user1")
 

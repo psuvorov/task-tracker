@@ -1,4 +1,6 @@
 (ns task-tracker.server-side.auth
+  (:use
+   task-tracker.server-side.config)
 
   (:require
    [ring.middleware.params :as params]
@@ -14,27 +16,24 @@
 
 
 
-(defn get-all-users-col []
-
-  (let [conn (mg/connect)
-        db   (mg/get-db conn "task_tracker")
-        coll "users"
-        res (vec (map (fn [entry]
+(defn- get-all-users-col []
+  (let [res (map (fn [entry]
                         (dissoc entry :_id)) ;; exclude _id field
-                      (mc/find-maps db coll {} )))]
-    (do
-      (mg/disconnect conn)
-      res)))
+                      (mc/find-maps (get mongo-connection-data :db) "users" {}))]
+    res))
+
 
 
 (defn check-user [login pass]
-    (= 1 (count (filter
+    (do
+      (println login)
+      (println pass)
+      (= 1 (count (filter
                (fn [user]
                  (and
                   (= login (get user :user_login))
-                  (noir.util.crypt/compare pass (get user :password_hash))
-                  ))
-               (get-all-users-col)))))
+                  (crypt/compare pass (get user :password_hash))))
+               (get-all-users-col))))))
 
 
 

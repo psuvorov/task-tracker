@@ -2,7 +2,7 @@
   (:use [compojure.core]
         [task-tracker.server-side.utils]
         [task-tracker.server-side.tasks]
-        [task-tracker.server-side.interchange]
+        [task-tracker.server-side.servercalls]
         [ring.middleware.edn]
 
         )
@@ -25,31 +25,22 @@
   ;; Normal requests
   (GET "/" [] (ring-resp/resource-response "public/views/index.html"))
 
-
   ;; EDN requests
   (POST "/login" [request] (params/wrap-params login-response request))
-  (POST "/get-tasks-data" [request] (user-tasks-response (params/wrap-params request) (do (println "aaaaa")
-                                                                                        ;;(session/put! :conn-data (mg/connect-via-uri "mongodb://madcat:!clojure!@oceanic.mongohq.com:10047/task_tracker"))
-                                                                                        (session/get :conn-data))))
-
-
-
+  (GET "/logout" [request] (params/wrap-params logout-response request))
+  (POST "/check-auth" [request] (params/wrap-params check-auth-response request))
+  (POST "/get-tasks-data" [request] (params/wrap-params user-tasks-response request))
 
   ;; Service requests
   (GET "/state" [request] (check-state))
+  ;;(GET "/denied" [] (ring-resp/resource-response "public/views/denied.html"))
   (route/resources "/")
-  (route/not-found (ring-resp/resource-response "public/views/not-found.html"))
-
-
-
-
-
-  )
+  (route/not-found (ring-resp/redirect "#not-found")))
 
 
 (defn app-init [handler]
   (fn [req]
-    (session/put! :conn-data (mg/connect-via-uri "mongodb://madcat:x@oceanic.mongohq.com:10047/task_tracker"))
+    (println "Starting app...")
     (handler req)))
 
 
