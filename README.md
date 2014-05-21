@@ -6,7 +6,7 @@ A website is written with Enfocus in ClojureScript and Clojure itself.
 
 There are the following features (at this stage):
  - User authentication via EDN format with encrypting the password and sending to the server;
- - Page protection (/tasks);
+ - Page protection;
  - Working through enfocus templates;
  - Working with mongodb;
  - Simple viewing assigned tasks;
