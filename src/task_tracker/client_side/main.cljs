@@ -19,6 +19,7 @@
  contact-tmpl-page
  tasks-tmpl-page-fn
  task-tmpl-page-fn
+ admin-tmpl-page
  denied-tmpl-page);;
 
 (def user-login (atom "")) ;;
@@ -41,6 +42,7 @@
     (= "authenticate" nval) (client-utils/navigate authenticate-tmpl-page)
     (= "contact" nval) (client-utils/navigate contact-tmpl-page)
     (= "tasks" nval) (client-utils/navigate tasks-tmpl-page-fn)
+    (= "admin" nval) (client-utils/navigate admin-tmpl-page)
     (apply = (map first [nval "task_"])) (client-utils/navigate (task-tmpl-page-fn (.substring nval (inc (.indexOf nval "_")) (count nval))))
     :else (ef/log-debug (pr-str "ERROR IN NAVIGATION" oval nval))))
 
@@ -75,6 +77,7 @@
               "#about_button" (ev/listen :click (update-hash :about))
               "#contact_button" (ev/listen :click (update-hash :contact))
               "#tasks_button" (ev/listen :click (update-hash :tasks))
+              "#admin_button" (ev/listen :click (update-hash :admin))
               ;;"#task_button" (ev/listen :click (update-hash :task))
               )
 
@@ -225,6 +228,23 @@
                     :handler task-handler
                     :error-handler error-handler
                     :params {:task-id task-id}}))
+
+
+;; Admin template
+(em/deftemplate admin-tmpl :compiled "public/templates/admin.html" [])
+(em/defaction admin-tmpl-page []
+
+
+  "#container_stage" (ef/do->
+
+                      (ef/content (admin-tmpl))
+                      (client-utils/reset-scroll))
+
+  "#singlebutton" (ev/listen :click
+                                    #(ef/at (.-currentTarget %)
+                                     (ef/content "I have been replaced")))
+  )
+
 
 
 
